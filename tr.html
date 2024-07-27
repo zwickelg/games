@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Training Timer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #ffecd2);
+            transition: background 0.5s ease;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        #training-name {
+            font-size: 2rem;
+            color: #4a4a4a;
+            margin-bottom: 1rem;
+        }
+        #counter {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Training Timer</h1>
+        <div id="training-name"></div>
+        <div id="counter"></div>
+    </div>
+
+    <script>
+        const trainings = [
+            { name: "Push-ups", duration: 5 },
+            { name: "Sit-ups", duration: 4 },
+            { name: "Squats", duration: 3 },
+            { name: "Plank", duration: 2 }
+        ];
+
+        let currentTrainingIndex = 0;
+        let countdown;
+
+        function updateBackground() {
+            const hue = Math.floor(Math.random() * 360);
+            document.body.style.background = `linear-gradient(45deg, 
+                hsl(${hue}, 100%, 80%), 
+                hsl(${(hue + 60) % 360}, 100%, 80%), 
+                hsl(${(hue + 120) % 360}, 100%, 80%))`;
+        }
+
+        function startTraining() {
+            if (currentTrainingIndex >= trainings.length) {
+                document.getElementById('training-name').textContent = "All done!";
+                document.getElementById('counter').textContent = "Great job!";
+                return;
+            }
+
+            const training = trainings[currentTrainingIndex];
+            document.getElementById('training-name').textContent = training.name;
+            countdown = training.duration;
+
+            updateCounter();
+            updateBackground();
+
+            const timer = setInterval(() => {
+                countdown--;
+                if (countdown >= 0) {
+                    updateCounter();
+                } else {
+                    clearInterval(timer);
+                    currentTrainingIndex++;
+                    startTraining();
+                }
+            }, 1000);
+        }
+
+        function updateCounter() {
+            document.getElementById('counter').textContent = countdown;
+        }
+
+        startTraining();
+    </script>
+</body>
+</html>
