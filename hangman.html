@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק האיש התלוי</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+        .word {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            direction: ltr;
+            unicode-bidi: bidi-override;
+        }
+        .hebrew-word {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        .guesses {
+            margin-bottom: 1rem;
+        }
+        input {
+            font-size: 1rem;
+            padding: 0.5rem;
+            width: 2rem;
+            text-align: center;
+        }
+        button {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .message {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        .success {
+            color: #10b981;
+        }
+        .error {
+            color: #ef4444;
+        }
+        #hangmanSvg {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>משחק האיש התלוי</h1>
+        <svg id="hangmanSvg" viewBox="0 0 100 100">
+            <!-- בסיס -->
+            <line x1="10" y1="95" x2="90" y2="95" stroke="black" stroke-width="2"/>
+            <!-- עמוד -->
+            <line x1="30" y1="95" x2="30" y2="5" stroke="black" stroke-width="2"/>
+            <!-- קורה עליונה -->
+            <line x1="30" y1="5" x2="70" y2="5" stroke="black" stroke-width="2"/>
+            <!-- חבל -->
+            <line x1="70" y1="5" x2="70" y2="20" stroke="black" stroke-width="2"/>
+            <!-- ראש -->
+            <circle cx="70" cy="30" r="10" stroke="black" stroke-width="2" fill="none" class="hangman-part" style="display: none;"/>
+            <!-- גוף -->
+            <line x1="70" y1="40" x2="70" y2="60" stroke="black" stroke-width="2" class="hangman-part" style="display: none;"/>
+            <!-- יד שמאל -->
+            <line x1="70" y1="45" x2="60" y2="55" stroke="black" stroke-width="2" class="hangman-part" style="display: none;"/>
+            <!-- יד ימין -->
+            <line x1="70" y1="45" x2="80" y2="55" stroke="black" stroke-width="2" class="hangman-part" style="display: none;"/>
+            <!-- רגל שמאל -->
+            <line x1="70" y1="60" x2="60" y2="75" stroke="black" stroke-width="2" class="hangman-part" style="display: none;"/>
+            <!-- רגל ימין -->
+            <line x1="70" y1="60" x2="80" y2="75" stroke="black" stroke-width="2" class="hangman-part" style="display: none;"/>
+        </svg>
+        <div class="hebrew-word" id="hebrewWord"></div>
+        <div class="word" id="word"></div>
+        <div class="guesses" id="guesses"></div>
+        <input type="text" id="guessInput" maxlength="1">
+        <button onclick="makeGuess()">נחש</button>
+        <button onclick="newGame()">משחק חדש</button>
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        const words = [
+            { hebrew: 'תפוח', english: 'apple' },
+            { hebrew: 'בית', english: 'house' },
+            { hebrew: 'ספר', english: 'book' },
+            { hebrew: 'מחשב', english: 'computer' },
+            { hebrew: 'שמש', english: 'sun' },
+        ];
+        
+        let currentWord, hebrewWord, guessedLetters, remainingGuesses;
+
+        function newGame() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex].english.toLowerCase();
+            hebrewWord = words[randomIndex].hebrew;
+            guessedLetters = [];
+            remainingGuesses = 6;
+            updateDisplay();
+            document.getElementById('message').textContent = '';
+            document.getElementById('guessInput').value = '';
+            document.querySelectorAll('.hangman-part').forEach(part => part.style.display = 'none');
+        }
+
+        function updateDisplay() {
+            document.getElementById('hebrewWord').textContent = `המילה בעברית: ${hebrewWord}`;
+            document.getElementById('word').textContent = currentWord
+                .split('')
+                .map(letter => guessedLetters.includes(letter) ? letter : '_')
+                .join(' ');
+            document.getElementById('guesses').textContent = `ניחושים נותרים: ${remainingGuesses}`;
+        }
+
+        function makeGuess() {
+            const guess = document.getElementById('guessInput').value.toLowerCase();
+            if (guess.length !== 1 || !/[a-z]/.test(guess)) {
+                alert('נא להזין אות אחת באנגלית');
+                return;
+            }
+            if (guessedLetters.includes(guess)) {
+                alert('כבר ניחשת את האות הזו');
+                return;
+            }
+            guessedLetters.push(guess);
+            if (!currentWord.includes(guess)) {
+                remainingGuesses--;
+                updateHangman();
+            }
+            updateDisplay();
+            checkGameStatus();
+            document.getElementById('guessInput').value = '';
+        }
+
+        function updateHangman() {
+            const parts = document.querySelectorAll('.hangman-part');
+            const index = 6 - remainingGuesses - 1;
+            if (index >= 0 && index < parts.length) {
+                parts[index].style.display = 'block';
+            }
+        }
+
+        function checkGameStatus() {
+            if (currentWord.split('').every(letter => guessedLetters.includes(letter))) {
+                document.getElementById('message').textContent = 'כל הכבוד! ניצחת!';
+                document.getElementById('message').className = 'message success';
+                document.getElementById('guessInput').disabled = true;
+            } else if (remainingGuesses === 0) {
+                document.getElementById('message').textContent = `המשחק נגמר. המילה הייתה "${currentWord}".`;
+                document.getElementById('message').className = 'message error';
+                document.getElementById('word').textContent = currentWord;
+                document.getElementById('guessInput').disabled = true;
+            }
+        }
+
+        newGame();
+    </script>
+</body>
+</html>
