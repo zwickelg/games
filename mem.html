@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק זיכרון אנגלית-אימוג'י</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .card {
+            width: 120px;
+            height: 120px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card-front {
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            font-size: 40px;
+        }
+        .card-back {
+            background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+            transform: rotateY(180deg);
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            padding: 10px;
+        }
+        #score, #cardPairs, #cefrLevel {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        select, #startGame {
+            font-size: 18px;
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        select:hover, #startGame:hover {
+            background-color: #45a049;
+        }
+        h1 {
+            color: #2193b0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>משחק זיכרון אנגלית-אימוג'י</h1>
+    <div id="cefrLevel">
+        <label for="cefr">בחר רמת CEFR:</label>
+        <select id="cefr">
+            <option value="A1">CEFR A1</option>
+            <option value="A2">CEFR A2</option>
+            <option value="B1">CEFR B1</option>
+            <option value="B2">CEFR B2</option>
+            <option value="C1">CEFR C1</option>
+            <option value="C2">CEFR C2</option>
+        </select>
+    </div>
+    <div id="cardPairs">
+        <label for="pairCount">בחר מספר זוגות:</label>
+        <select id="pairCount">
+            <option value="4">4 זוגות</option>
+            <option value="6">6 זוגות</option>
+            <option value="8" selected>8 זוגות</option>
+            <option value="10">10 זוגות</option>
+        </select>
+    </div>
+    <button id="startGame">התחל משחק</button>
+    <div id="score">ניקוד: 0</div>
+    <div class="game-board" id="gameBoard"></div>
+
+    <script>
+        const wordsPerLevel = {
+            A1: [
+                {english: "Hello", emoji: "👋"},
+                {english: "Dog", emoji: "🐶"},
+                {english: "Cat", emoji: "🐱"},
+                {english: "House", emoji: "🏠"},
+                {english: "Apple", emoji: "🍎"},
+                {english: "Water", emoji: "💧"},
+                {english: "Sun", emoji: "☀️"},
+                {english: "Book", emoji: "📚"},
+                {english: "Ball", emoji: "⚽"},
+                {english: "Car", emoji: "🚗"}
+            ],
+            A2: [
+                {english: "Family", emoji: "👪"},
+                {english: "School", emoji: "🏫"},
+                {english: "Friend", emoji: "🤝"},
+                {english: "Food", emoji: "🍽️"},
+                {english: "Money", emoji: "💰"},
+                {english: "Time", emoji: "⏰"},
+                {english: "Weather", emoji: "🌦️"},
+                {english: "Phone", emoji: "📱"},
+                {english: "Music", emoji: "🎵"},
+                {english: "Clothes", emoji: "👚"}
+            ],
+            B1: [
+                {english: "Travel", emoji: "✈️"},
+                {english: "Work", emoji: "💼"},
+                {english: "Hobby", emoji: "🎨"},
+                {english: "Technology", emoji: "💻"},
+                {english: "Environment", emoji: "🌳"},
+                {english: "Culture", emoji: "🎭"},
+                {english: "Sport", emoji: "🏅"},
+                {english: "Health", emoji: "🏥"},
+                {english: "Shopping", emoji: "🛍️"},
+                {english: "Communication", emoji: "📢"}
+            ],
+            B2: [
+                {english: "Economy", emoji: "📊"},
+                {english: "Politics", emoji: "🏛️"},
+                {english: "Science", emoji: "🔬"},
+                {english: "Literature", emoji: "📖"},
+                {english: "Psychology", emoji: "🧠"},
+                {english: "Education", emoji: "🎓"},
+                {english: "Media", emoji: "📺"},
+                {english: "History", emoji: "🏺"},
+                {english: "Philosophy", emoji: "🤔"},
+                {english: "Architecture", emoji: "🏗️"}
+            ],
+            C1: [
+                {english: "Globalization", emoji: "🌐"},
+                {english: "Innovation", emoji: "💡"},
+                {english: "Sustainability", emoji: "♻️"},
+                {english: "Legislation", emoji: "⚖️"},
+                {english: "Diplomacy", emoji: "🤝"},
+                {english: "Anthropology", emoji: "🦴"},
+                {english: "Astrophysics", emoji: "🔭"},
+                {english: "Biotechnology", emoji: "🧬"},
+                {english: "Linguistics", emoji: "🗣️"},
+                {english: "Epistemology", emoji: "🧐"}
+            ],
+            C2: [
+                {english: "Quantum", emoji: "⚛️"},
+                {english: "Existentialism", emoji: "🤷"},
+                {english: "Paradigm", emoji: "🔄"},
+                {english: "Enigma", emoji: "🧩"},
+                {english: "Paradox", emoji: "↔️"},
+                {english: "Metaphysics", emoji: "🌌"},
+                {english: "Serendipity", emoji: "🍀"},
+                {english: "Zeitgeist", emoji: "⏳"},
+                {english: "Entropy", emoji: "🌀"},
+                {english: "Quintessence", emoji: "💎"}
+            ]
+        };
+
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let score = 0;
+        let gameWords = [];
+
+        function createCard(content, isEmoji) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const cardInner = document.createElement('div');
+            cardInner.className = 'card-inner';
+            const cardFront = document.createElement('div');
+            cardFront.className = 'card-front';
+            cardFront.textContent = '?';
+            const cardBack = document.createElement('div');
+            cardBack.className = 'card-back';
+            cardBack.textContent = content;
+            cardInner.appendChild(cardFront);
+            cardInner.appendChild(cardBack);
+            card.appendChild(cardInner);
+            card.addEventListener('click', () => flipCard(card, content, isEmoji));
+            return card;
+        }
+
+        function flipCard(card, content, isEmoji) {
+            if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                card.classList.add('flipped');
+                flippedCards.push({card, content, isEmoji});
+
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = gameWords.some(pair => 
+                (pair.english === card1.content && pair.emoji === card2.content) ||
+                (pair.english === card2.content && pair.emoji === card1.content)
+            );
+
+            if (isMatch) {
+                card1.card.style.visibility = 'hidden';
+                card2.card.style.visibility = 'hidden';
+                matchedPairs++;
+                score += 10;
+                updateScore();
+
+                if (matchedPairs === gameWords.length) {
+                    alert('כל הכבוד! סיימת את המשחק עם ' + score + ' נקודות!');
+                }
+            } else {
+                card1.card.classList.remove('flipped');
+                card2.card.classList.remove('flipped');
+            }
+
+            flippedCards = [];
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = 'ניקוד: ' + score;
+        }
+
+        function initializeGame() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            const pairCount = parseInt(document.getElementById('pairCount').value);
+            const cefrLevel = document.getElementById('cefr').value;
+            gameWords = wordsPerLevel[cefrLevel].slice(0, pairCount);
+            const allCards = [
+                ...gameWords.map(pair => ({content: pair.english, isEmoji: false})),
+                ...gameWords.map(pair => ({content: pair.emoji, isEmoji: true}))
+            ];
+            allCards.sort(() => Math.random() - 0.5);
+
+            gameBoard.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(allCards.length))}, 1fr)`;
+
+            allCards.forEach(({content, isEmoji}) => {
+                const card = createCard(content, isEmoji);
+                gameBoard.appendChild(card);
+            });
+
+            matchedPairs = 0;
+            score = 0;
+            updateScore();
+        }
+
+        document.getElementById('startGame').addEventListener('click', initializeGame);
+
+        initializeGame();
+    </script>
+</body>
+</html>
