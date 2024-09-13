@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק טריוויה - חברים</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #194d33;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .answer {
+            background-color: #e6f3ff;
+            border: 2px solid #b3d9ff;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .answer:hover {
+            background-color: #cce6ff;
+        }
+        .selected {
+            background-color: #66b3ff;
+            color: white;
+        }
+        .correct {
+            background-color: #99ff99;
+            border-color: #4caf50;
+        }
+        .incorrect {
+            background-color: #ff9999;
+            border-color: #f44336;
+        }
+        .result {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .next-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .next-btn:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            .question {
+                font-size: 16px;
+            }
+            .answer {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>טריוויה - חברים</h1>
+        <div id="quiz"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "מה היה שם הלהקה של פיבי לפני 'Phoebe Buffay & The Hairballs'?",
+                answers: [
+                    "Jingle Belles",
+                    "Smelly Cat",
+                    "Sticky Shoes",
+                    "Perky Nana"
+                ],
+                correct: 0
+            },
+            {
+                question: "מהו שם המשפחה המלא של צ'נדלר?",
+                answers: [
+                    "Bing",
+                    "Muriel",
+                    "Bing-Muriel",
+                    "Bing-Hosselkus"
+                ],
+                correct: 2
+            },
+            {
+                question: "באיזה פרק מספר ג'ואי לרייצ'ל שהוא מאוהב בה?",
+                answers: [
+                    "The One Where Joey Tells Rachel",
+                    "The One in Barbados",
+                    "The One After Joey and Rachel Kiss",
+                    "The One with Ross's Tan"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שם הסרט הראשון שרוס ופיבי ראו יחד?",
+                answers: [
+                    "Logan's Run",
+                    "Jurassic Park",
+                    "Clash of the Titans",
+                    "The English Patient"
+                ],
+                correct: 2
+            },
+            {
+                question: "מהו המספר המדויק של הקטגוריות בהן מוניקה ארגנה את המגבות שלה?",
+                answers: [
+                    "7",
+                    "11",
+                    "13",
+                    "15"
+                ],
+                correct: 1
+            },
+            {
+                question: "מהו שמה המלא של אמא של צ'נדלר?",
+                answers: [
+                    "Nora Tyler Bing",
+                    "Helena Handbasket",
+                    "Amanda Bing",
+                    "Erica Tyler"
+                ],
+                correct: 0
+            },
+            {
+                question: "באיזו שנה התרחשה העלילה של הפרק הראשון בסדרה?",
+                answers: [
+                    "1993",
+                    "1994",
+                    "1995",
+                    "1996"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שם הקוף של רוס?",
+                answers: [
+                    "George",
+                    "Marcel",
+                    "Jack",
+                    "Monkey"
+                ],
+                correct: 1
+            },
+            {
+                question: "מהו מספר הדירה של מוניקה ורייצ'ל?",
+                answers: [
+                    "19",
+                    "20",
+                    "5",
+                    "15"
+                ],
+                correct: 2
+            },
+            {
+                question: "איזה כינוי נתן ריצ'רד למוניקה?",
+                answers: [
+                    "Little Harmonica",
+                    "Mon",
+                    "Sweet Pie",
+                    "Cookie"
+                ],
+                correct: 0
+            },
+            {
+                question: "מה היה שם המסעדה שבה עבדה מוניקה בעונה הראשונה?",
+                answers: [
+                    "Moondance Diner",
+                    "Iridium",
+                    "Alessandro's",
+                    "Javu"
+                ],
+                correct: 0
+            },
+            {
+                question: "מה היה שם הבושם שג'ואי פרסם?",
+                answers: [
+                    "Eau de Joey",
+                    "Hombre",
+                    "Tribbiani",
+                    "Gio by Joey"
+                ],
+                correct: 1
+            },
+            {
+                question: "מהו שם המשפחה של פיבי לפני שהתחתנה?",
+                answers: [
+                    "Buffay",
+                    "Buffay-Hannigan",
+                    "Nestle Toulouse",
+                    "Buffay-Buffay"
+                ],
+                correct: 0
+            },
+            {
+                question: "מה היה שם התוכנית שבה כיכב ג'ואי בעונה השנייה?",
+                answers: [
+                    "Days of Our Lives",
+                    "Mac and C.H.E.E.S.E.",
+                    "Queens of Hearts",
+                    "Deep Powder"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שמו של האקס המפורסם של רייצ'ל מהתיכון?",
+                answers: [
+                    "Chip Matthews",
+                    "Tag Jones",
+                    "Paolo",
+                    "Barry Farber"
+                ],
+                correct: 0
+            },
+            {
+                question: "איזה מאכל הכינה רייצ'ל בטעות לקינוח ביום ההודיה?",
+                answers: [
+                    "Shepherd's Pie",
+                    "Mince Pie",
+                    "Trifle",
+                    "Custard"
+                ],
+                correct: 2
+            },
+            {
+                question: "מה היה שם הדמות של ג'ואי ב'Days of Our Lives'?",
+                answers: [
+                    "Drake Ramoray",
+                    "Stryker Ramoray",
+                    "Joey Tribbiani",
+                    "Victor Ramoray"
+                ],
+                correct: 0
+            },
+            {
+                question: "מה היה הכינוי של רוס בתיכון?",
+                answers: [
+                    "Dinosaur Boy",
+                    "Ross the Boss",
+                    "Ross-a-tron",
+                    "Red Ross"
+                ],
+                correct: 2
+            },
+            {
+                question: "מה היה שם החנות שפיבי עבדה בה כמעסה?",
+                answers: [
+                    "Healing Hands",
+                    "Relaxation Station",
+                    "Soothing Touch",
+                    "Happy Endings"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שם הלהקה של רוס בקולג'?",
+                answers: [
+                    "Way, No Way",
+                    "Emotional Knapsack",
+                    "Science Boy",
+                    "Rossatron and the Dinosaurs"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שמו של הבן הדמיוני של פיבי?",
+                answers: [
+                    "Phoebo",
+                    "Joey",
+                    "Frank Jr. Jr.",
+                    "Altman"
+                ],
+                correct: 0
+            },
+            {
+                question: "איזה מתנה נתן ג'ואי לצ'נדלר ביום ההולדת ה-30 שלו?",
+                answers: [
+                    "כיסא מתנפח",
+                    "ברווז וותרנגול",
+                    "שעון זהב",
+                    "מנוי לנטפליקס"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שם המחזה שג'ואי השתתף בו וצ'נדלר שנא?",
+                answers: [
+                    "Boxing Day",
+                    "Freud!",
+                    "A Streetcar Named Desire",
+                    "The Music Man"
+                ],
+                correct: 1
+            },
+            {
+                question: "מה היה שם החברה שצ'נדלר עבד בה לפני שעבר לפרסום?",
+                answers: [
+                    "Central Perk",
+                    "Statistic Inc.",
+                    "Data Analysis Corp",
+                    "לא נאמר בסדרה"
+                ],
+                correct: 3
+            },
+            {
+                question: "מהו שם המשפחה של קרול, אשתו הראשונה של רוס?",
+                answers: [
+                    "Willick",
+                    "Bunch",
+                    "Green",
+                    "Geller"
+                ],
+                correct: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const quizContainer = document.getElementById('quiz');
+
+        function loadQuestion() {
+            const question = quizData[currentQuestion];
+            let quizHTML = `
+                <div class="question">${question.question}</div>
+                <div class="answers">
+                    ${question.answers.map((answer, index) => `
+                        <div class="answer" onclick="selectAnswer(${index})">${answer}</div>
+                    `).join('')}
+                </div>
+                <div class="result"></div>
+            `;
+            quizContainer.innerHTML = quizHTML;
+        }
+
+        function selectAnswer(answerIndex) {
+            const answers = document.querySelectorAll('.answer');
+            const result = document.querySelector('.result');
+            const question = quizData[currentQuestion];
+
+            answers.forEach(answer => answer.classList.remove('selected'));
+            answers[answerIndex].classList.add('selected');
+
+            if (answerIndex === question.correct) {
+                answers[answerIndex].classList.add('correct');
+                result.textContent = 'נכון!';
+                score++;
+            } else {
+                answers[answerIndex].classList.add('incorrect');
+                answers[question.correct].classList.add('correct');
+                result.textContent = 'לא נכון. התשובה הנכונה היא: ' + question.answers[question.correct];
+            }
+
+            if (currentQuestion < quizData.length - 1) {
+                quizContainer.innerHTML += '<button class="next-btn" onclick="nextQuestion()">השאלה הבאה</button>';
+            } else {
+                quizContainer.innerHTML += `<div class="result">הציון הסופי שלך: ${score} מתוך ${quizData.length}</div>`;
+            }
+
+            answers.forEach(answer => answer.onclick = null);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
