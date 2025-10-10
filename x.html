@@ -138,7 +138,7 @@
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: id ? { exact: id } : undefined,
-            facingMode: "environment",
+            facingMode: { exact: "environment" },
             width: { ideal: 2560 },
             height: { ideal: 1440 },
             focusMode: "manual",
